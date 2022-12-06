@@ -56,6 +56,7 @@ class MyMayaWidget(QWidget):
         # Create drop box and add to the layout
         self.fileExt = QComboBox()
         self.fileExt.addItems(['fbx','obj','mb','ma'])
+        layout.addWidget(self.fileExt)
      
     # create a function to define what button1 does when clicked
     def button1_onClicked(self):
