@@ -1,7 +1,10 @@
 # Main Script for Final
 
+
 # import statements
-from maya import OpenMayaUI as omui 
+import json
+import os
+from maya import OpenMayaUI as omui
 from PySide2.QtCore import * 
 from PySide2.QtGui import * 
 from PySide2.QtWidgets import *
@@ -43,6 +46,15 @@ class MyMayaWidget(QWidget):
         self.button2 = QPushButton('Reference Model Version', self)
         layout.addWidget(self.button2)
 
+        # Create text editors and add to the layout
+        self.artist_Name = QLineEdit('Artist Name', self)
+        self.version_Number = QLineEdit('Version Number', self)
+
+        # Create drop box and add to the layout
+        self.file_Ext = QComboBox()
+        self.file_Ext.addItems(['fbx','obj','mb','ma'])
+
+
         # When the button is clicked, connect a signal to run the proper function
         self.button2.clicked.connect(self.button2_onClicked)  
 
@@ -54,15 +66,32 @@ class MyMayaWidget(QWidget):
         modelPath = maya.cmds.ls(sl=True,l=True)
         rig.createJoints(modelPath)
 
+
+
     # create a function to define what button2 does when clicked
     def button2_onClicked(self):
         '''
         INSERT CODE HERE!!!!!! (idk where to even start this feels definitely wrong)
         '''
-        name = input("type the name of the reference model")
-        num = input("type the version number you wish to use")
-        maya.cmds.createReference()
+        asset_info = {"project": os.getenv('project'),
+                      "asset": os.getenv('asset'),
+                      "task": os.getenv('task'),
+                      "artist": self.artist_Name.toPlainText(),  # usually built-in
+                      "version": self.version_NumbertoPlainText(),
+                      "ext": self.file_Ext.currentText()
+                      }
+
+        naming = rig.getNamingFile()['namingConvention']
+        fileName = naming.format(**asset_info)
+        filePath = maya.cmds.file(q=True, sn=True)
+        assetFile = os.path.join(os.path.dirname(filePath), fileName)
+        files = maya.cmds.getFileList(folder=os.path.dirname(filePath), filespec=fileName)
+        if len(files) == 0:
+            maya.cmds.warning("No file found")
+        maya.cmds.file(os.path.dirname(filePath)+fileName, i=True)
         # ^^ note: in the documentation I couldnt find anything about creating a reference in Maya?? just editing a pre-existing one??
+
+
 
 
 # initialize button and make it visible

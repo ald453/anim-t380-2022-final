@@ -4,14 +4,14 @@ import os
 import maya.cmds as mp
 
 
-def getLocatorNaming():
+def getNamingFile():
     """
     get the json file which have the naming convention for locators
     """
-
-    asset_metadata_file = os.path.join(os.getcwd(), "metadata.json")
-    metadata_file = open(asset_metadata_file)
-    return json.load(metadata_file)
+    filePath = mp.file(q=True, sn=True)
+    asset_naming_file = os.path.join(os.path.dirname(filePath), "namingConvention.json")
+    naming_file = open(asset_naming_file)
+    return json.load(naming_file)
 
 
 def createJoint(obj):
@@ -35,7 +35,7 @@ def createJoints(obj):
     else:
         jointGRP = mp.group(em=True, name='RIG')
 
-    naming = getLocatorNaming()
+    naming = getNamingFile()
 
     # create root joint
     root = mp.ls(naming["root"])
