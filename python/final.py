@@ -35,6 +35,7 @@ class MyMayaWidget(QWidget):
         self.button1 = QPushButton('Create Simple Rig', self)
         layout.addWidget(self.button1)
 
+        self.curve_name = QLineEdit('Curve Name', self)
         # When the button is clicked, connect a signal to run the proper function 
         self.button1.clicked.connect(self.button1_onClicked)   
 
@@ -50,7 +51,8 @@ class MyMayaWidget(QWidget):
         '''
         INSERT CODE HERE!!!!!! (i think thats all this one needs?)
         '''
-        rig.createJoints()
+        modelPath = maya.cmds.ls(sl=True,l=True)
+        rig.createJoints(modelPath)
 
     # create a function to define what button2 does when clicked
     def button2_onClicked(self):

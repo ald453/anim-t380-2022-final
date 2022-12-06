@@ -29,7 +29,7 @@ def createJoint(obj):
             createJoint(c)
 
 
-def createJoints():
+def createJoints(obj):
     if mp.objExists('RIG'):
         print('RIG already exists')
     else:
@@ -39,4 +39,4 @@ def createJoints():
 
     # create root joint
     root = mp.ls(naming["root"])
-    createJoint(root)
+    createJoint(obj+'|'+root)
