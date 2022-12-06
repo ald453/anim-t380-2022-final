@@ -70,30 +70,42 @@ class MyMayaWidget(QWidget):
         :param obj: locator to create joint at
         :return: None
         """
+
         pos = maya.cmds.xform(obj, q=True, t=True, ws=True)
         j = maya.cmds.joint(radius=0.08, p=pos, name="RIG_" + obj)
 
-        children = maya.cmds.listRelatives(obj, c=True, type='locator')
+        children = maya.cmds.listRelatives(obj, c=True, type='transform')
         if children:
             for c in children:
-                self.createJoint(obj+'|'+c)
+                newJoint = self.createJoint(obj+'|'+c)
+                parent = maya.cmds.listRelatives(newJoint, p=True)
+                if j not in parent:
+                    maya.cmds.parent(newJoint, j)
+        return j
 
     def createJoints(self, obj):
-        if maya.cmds.objExists('RIG'):
+        objList = maya.cmds.listRelatives(obj, c=True)
+        if 'RIG' in objList:
             print('RIG already exists')
+            jointGRP = obj+'|RIG'
         else:
             jointGRP = maya.cmds.group(em=True, name='RIG')
+            maya.cmds.parent(jointGRP, obj)
+            jointGRP = obj+'|'+jointGRP
 
         naming = self.getNamingFile()
 
         # create root joint
-        root = maya.cmds.ls(naming["root"])
-        self.createJoint(obj + '|' + root)
+        root = naming["root"]
+        rootJoint = self.createJoint(obj + '|' + root)
+        parent = maya.cmds.listRelatives(rootJoint, p=True, f=True)
+        if jointGRP not in parent:
+            maya.cmds.parent(rootJoint, jointGRP)
 
     # create a function to define what button1 does when clicked
     def button1_onClicked(self):
         modelPath = maya.cmds.ls(sl=True,l=True)
-        self.createJoints(modelPath)
+        self.createJoints(modelPath[0])
 
     # create a function to define what button2 does when clicked
     def button2_onClicked(self):
