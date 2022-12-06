@@ -10,9 +10,6 @@ from PySide2.QtWidgets import *
 from shiboken2 import wrapInstance
 import maya.cmds
 
-# import rig.py script
-import rig
-
 # Get a reference to the main Maya application window
 mayaMainWindowPtr = omui.MQtUtil.mainWindow()
 mayaMainWindow = wrapInstance(int(mayaMainWindowPtr), QWidget) 
@@ -57,11 +54,46 @@ class MyMayaWidget(QWidget):
         self.fileExt = QComboBox()
         self.fileExt.addItems(['fbx','obj','mb','ma'])
         layout.addWidget(self.fileExt)
-     
+
+    def getNamingFile(self):
+        """
+        get the json file which have the naming convention for locators
+        """
+        filePath = maya.cmds.file(q=True, sn=True)
+        asset_naming_file = os.path.join(os.path.dirname(filePath), "namingConvention.json")
+        naming_file = open(asset_naming_file)
+        return json.load(naming_file)
+
+    def createJoint(self, obj):
+        """
+        create Joint at locator and call itself on the joint's children if there is any
+        :param obj: locator to create joint at
+        :return: None
+        """
+        pos = maya.cmds.xform(obj, q=True, t=True, ws=True)
+        j = maya.cmds.joint(radius=0.08, p=pos, name="RIG_" + obj)
+
+        children = maya.cmds.listRelatives(obj, c=True, type='locator')
+        if children:
+            for c in children:
+                self.createJoint(obj+'|'+c)
+
+    def createJoints(self, obj):
+        if maya.cmds.objExists('RIG'):
+            print('RIG already exists')
+        else:
+            jointGRP = maya.cmds.group(em=True, name='RIG')
+
+        naming = self.getNamingFile()
+
+        # create root joint
+        root = maya.cmds.ls(naming["root"])
+        self.createJoint(obj + '|' + root)
+
     # create a function to define what button1 does when clicked
     def button1_onClicked(self):
         modelPath = maya.cmds.ls(sl=True,l=True)
-        rig.createJoints(modelPath)
+        self.createJoints(modelPath)
 
     # create a function to define what button2 does when clicked
     def button2_onClicked(self):
@@ -73,10 +105,9 @@ class MyMayaWidget(QWidget):
                       "ext": self.fileExt.currentText()
                       }
 
-        naming = rig.getNamingFile()['namingConvention']
+        naming = self.getNamingFile()['namingConvention']
         fileName = naming.format(**asset_info)
         filePath = maya.cmds.file(q=True, sn=True)
-        assetFile = os.path.join(os.path.dirname(filePath), fileName)
         files = maya.cmds.getFileList(folder=os.path.dirname(filePath), filespec=fileName)
         if len(files) == 0:
             maya.cmds.warning("No file found")
