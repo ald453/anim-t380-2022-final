@@ -1,4 +1,5 @@
 # Main Script for Final
+# Robin Shang & Adrianna Deeb
 
 # import statements
 import json
@@ -37,13 +38,6 @@ class MyMayaWidget(QWidget):
         # When button1 is clicked, connect a signal to run the proper function 
         self.button1.clicked.connect(self.button1_onClicked)   
 
-        # Create button2 and add to the layout
-        self.button2 = QPushButton('Reference Model Version', self)
-        layout.addWidget(self.button2)
-
-        # When the button is clicked, connect a signal to run the proper function
-        self.button2.clicked.connect(self.button2_onClicked)  
-
         # Create text editors and add to the layout
         self.artistName = QLineEdit('Artist Name', self)
         self.versionNumber = QLineEdit('Version Number', self)
@@ -55,6 +49,14 @@ class MyMayaWidget(QWidget):
         self.fileExt.addItems(['fbx','obj','mb','ma'])
         layout.addWidget(self.fileExt)
 
+        # Create button2 and add to the layout
+        self.button2 = QPushButton('Reference Model Version', self)
+        layout.addWidget(self.button2)
+
+        # When the button is clicked, connect a signal to run the proper function
+        self.button2.clicked.connect(self.button2_onClicked)  
+
+# create necessary functions for the procedural rigging tool
     def getNamingFile(self):
         """
         get the json file which have the naming convention for locators
